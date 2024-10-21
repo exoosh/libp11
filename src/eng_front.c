@@ -190,11 +190,13 @@ static EVP_PKEY *load_privkey(ENGINE *engine, const char *s_key_id,
 	if (!ctx)
 		return 0;
 	bind_helper_methods(engine);
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	if (OpenSSL_version_num() == 0x30200000L || OpenSSL_version_num() == 0x30200010L) {
 		printf("Workaround for %s enabled\n",
 			OpenSSL_version(OPENSSL_VERSION));
 		ENGINE_set_default_string(engine, "PKEY_CRYPTO");
 	}
+#endif
 	pkey = ctx_load_privkey(ctx, s_key_id, ui_method, callback_data);
 #ifdef EVP_F_EVP_PKEY_SET1_ENGINE
 	/* EVP_PKEY_set1_engine() is required for OpenSSL 1.1.x,
@@ -250,7 +252,7 @@ static int bind_helper_methods(ENGINE *e)
 #ifndef OPENSSL_NO_RSA
 			!ENGINE_set_RSA(e, PKCS11_get_rsa_method()) ||
 #endif
-#if OPENSSL_VERSION_NUMBER  >= 0x10100002L
+#if OPENSSL_VERSION_NUMBER >= 0x10100002L
 #ifndef OPENSSL_NO_EC
 			/* PKCS11_get_ec_key_method combines ECDSA and ECDH */
 			!ENGINE_set_EC(e, PKCS11_get_ec_key_method()) ||
